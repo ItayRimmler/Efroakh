@@ -65,9 +65,9 @@ def feedforward(nodes, weights, bias, input):
         activated_nodes.append(np.zeros(nodes[i].shape))
         for j in range(activated_nodes[-1].shape[0]):
             if i == len(weights):
-                activated_nodes[i][j] = ReLU(nodes[i][j])
-            else:
                 activated_nodes[i][j] = softmax(nodes[i], j)
+            else:
+                activated_nodes[i][j] = ReLU(nodes[i][j])
     return activated_nodes, nodes
 
 def create_NN(input, layers, output, bias=None, w_range=None):
@@ -124,7 +124,7 @@ def cross_entropy_loss(output, actual_output):
     :param actual_output: The actual output
     :return: The loss
     """
-    return np.sum(np.log(output) * actual_output)
+    return -np.sum(np.log(output) * actual_output)
 
 def softmax_gradient(s):
     """

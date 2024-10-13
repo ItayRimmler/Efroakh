@@ -15,22 +15,23 @@ import input.dataset_readers.txt_reader as txt_reader
 import input.embedding.embed as embed
 import input.vectorizing.vectorize as vectorize
 import nn
+from hyperparameters import *
 
 corpus = txt_reader.read_prompts_from_file("./assets/prompt_dataset.txt")
 dataset, vocab_len, translator = embed.embed(corpus)
 new_dataset = vectorize.vectorize(dataset, vocab_len)
 input_layer_size = new_dataset.shape[-1]
 output_layer_size = vocab_len
-hidden_layer_sizes = [4, 8, 4]
+hidden_layer_sizes = HIDDEN_LAYER_SIZES
 a_nodes, weights, bias = nn.create_NN(input_layer_size, hidden_layer_sizes, output_layer_size)
 
 # Training currently with the whole dataset
-for j in range(10):
-    for i in range(int(new_dataset.shape[0]/100)):
+for j in range(EPOCHS):
+    for i in range(new_dataset.shape[0]):
         a_nodes, z_nodes = nn.feedforward(a_nodes, weights, bias, new_dataset[i, 0, :])
-        weights, bias = nn.backpropagation_and_optimization(weights, bias, z_nodes, a_nodes, new_dataset[i, 1, :], 0.001)
-    loss = nn.cross_entropy_loss(a_nodes[-1], new_dataset[int(new_dataset.shape[0]/100),1,:])
-    print(f"Current epoch: {j + 1}/10. Current loss: {loss}")
+        weights, bias = nn.backpropagation_and_optimization(weights, bias, z_nodes, a_nodes, new_dataset[i, 1, :], LR)
+    loss = nn.cross_entropy_loss(a_nodes[-1], new_dataset[new_dataset.shape[0],1,:])
+    print(f"Current epoch: {j + 1}/{EPOCHS}. Current loss: {loss}")
 
 # Testing blindly:
 prompt = input()

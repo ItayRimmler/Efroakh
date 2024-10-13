@@ -17,7 +17,7 @@ import input.vectorizing.vectorize as vectorize
 import nn
 from hyperparameters import *
 
-corpus = txt_reader.read_prompts_from_file("./assets/prompt_dataset.txt")
+corpus = txt_reader.read_prompts_from_file("./assets/prompt_dataset.txt")[BEGINNING:BEGINNING + SAMPLE_SIZE]
 dataset, vocab_len, translator = embed.embed(corpus)
 new_dataset = vectorize.vectorize(dataset, vocab_len)
 input_layer_size = new_dataset.shape[-1]
@@ -30,7 +30,7 @@ for j in range(EPOCHS):
     for i in range(new_dataset.shape[0]):
         a_nodes, z_nodes = nn.feedforward(a_nodes, weights, bias, new_dataset[i, 0, :])
         weights, bias = nn.backpropagation_and_optimization(weights, bias, z_nodes, a_nodes, new_dataset[i, 1, :], LR)
-    loss = nn.cross_entropy_loss(a_nodes[-1], new_dataset[new_dataset.shape[0],1,:])
+    loss = nn.cross_entropy_loss(a_nodes[-1], new_dataset[new_dataset.shape[0]-1,1,:])
     print(f"Current epoch: {j + 1}/{EPOCHS}. Current loss: {loss}")
 
 # Testing blindly:

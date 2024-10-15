@@ -38,7 +38,7 @@ def softmax(x, i):
     return numerator/denominator
 
 def ReLU(x):
-    return np.max(x,0)
+    return np.max([x,0])
 
 def feedforward(nodes, weights, bias, input):
     """

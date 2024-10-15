@@ -15,26 +15,22 @@ Deez: Nuts\n
 import string
 
 
-lowercase = lambda a: [w.lower() for w in a]
-rid_of_i_we = lambda a: [w if not w == "i" and not w == "we" and not w == "me" else "user" for w in a ]
-def rid_of_punctuation(a):
-    for w in a:
-        if w in string.punctuation:
-            a.remove(w)
-        else:
-            for l in w:
-                if l in string.punctuation:
-                    w.replace(l, "")
-                    break
-    return a
-def rid_of_ing(a):
-    for i in range(len(a)):
-        if "ing" == a[i][-3:]:
-            a[i] = a[i][:-3]
-    return a
-def rid_of_preposition(a):
-    for w in a:
-        if w in ["a", "an", "some", "is", "are", "am"]:
-            a.remove(w)
-    return a
+lowercase = lambda w: w.lower()
+rid_of_i_we = lambda w: w if not w == "i" and not w == "we" and not w == "me" else "user"
+def rid_of_punctuation(w):
+    if w in string.punctuation:
+        return ""
+    else:
+        for l in w:
+            if l in string.punctuation:
+                w.replace(l, "")
+    return w
+def rid_of_ing(w):
+    if w[-3:] == "ing":
+        return w[:-3]
+    return w
+def rid_of_preposition(w):
+    if w in ["a", "an", "some", "is", "are", "am"]:
+            return ""
+    return w
 # Feel free to add more functions as needed!

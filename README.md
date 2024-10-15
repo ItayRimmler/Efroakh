@@ -32,17 +32,27 @@ Feel free to submit issues and pull requests! If you have future ideas of things
 
 ## FAQ
 
+
 **Q** - Why so many branches?
+
 **A** - I do this project and learning in the process. So I sometimes need to fundementally change the code, but I don't want to get rid of it.
 
+
 **Q** - Why did you not continue with CBOW branch?
+
 **A** - I didn't think this through enough, and I lacked experience in NLP, so I initally believed that CBOW will help me classify sentences. Apperantly, I needed to convert the sentences into vectors somehow, then label each sentence, then work with this.
 
+
 **Q** - Why leaving CBOW branch then, if it doesn't work necessarily?
+
 **A** - Umm... I really like what I did there in general, even if it's useless for the project. It stays mostly for the ego and because I wanna flex. So there ya go.
 
+
 **Q** - What's the purpose of the Sentence-encoding branch?
+
 **A** - Attempt what CBOW branch had tried, only this time convert the sentences into vectors somehow, then label each sentence, then work with this.
 
+
 **Q** - Do you plan to add more to that branch?
+
 **A** - Not necessarily. I do have more plans. I do this while simultaniously learning RNN and more subjects in NLP. So the plan is to try this, then in the same branch\in a different one switch my feedforward NN with RNN and apply more advanced techniques in NLP

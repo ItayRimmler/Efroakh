@@ -13,6 +13,7 @@ Deez: Nuts\n
 
 # Imports
 import numpy as np
+from hyperparameters import *
 
 # Functions
 def create_random_matrix(my_size, my_range):
@@ -24,21 +25,26 @@ def create_random_matrix(my_size, my_range):
     """
     return np.random.rand(my_size[0], my_size[1]) * (max(my_range) - min(my_range)) + min(my_range)
 
-def softmax(x, i):
+def softmax(x):
     """
     Softmax activation function for an element** in a vector*\n
     :param x: *this is the vector
     :param i: **this is the index of the element
     :return: Node's value after applying the activation function on it
     """
-    numerator = np.exp(x[i])
-    denominator = 0
-    for element in x:
-        denominator += np.sum(np.exp(element))
-    return numerator/denominator
+    numerator = np.exp(x - np.max(x))
+    # denominator = 0
+    # for element in x:
+    #     denominator += np.sum(np.exp(element))
+    return numerator/np.sum(numerator)
 
 def ReLU(x):
-    return np.max([x,0])
+    """
+    LEAKY ReLU.\n
+    """
+    if x > 0:
+        return x
+    return LEAK * x
 
 def feedforward(nodes, weights, bias, input):
     """
@@ -65,7 +71,8 @@ def feedforward(nodes, weights, bias, input):
         activated_nodes.append(np.zeros(nodes[i].shape))
         for j in range(activated_nodes[-1].shape[0]):
             if i == len(weights):
-                activated_nodes[i][j] = softmax(nodes[i], j)
+                activated_nodes[i] = softmax(nodes[i])
+                break
             else:
                 activated_nodes[i][j] = ReLU(nodes[i][j])
     return activated_nodes, nodes
@@ -90,16 +97,16 @@ def create_NN(input, layers, output, bias=None, w_range=None):
             if w_range:
                 weights.append(create_random_matrix((layers[i], input), w_range))
             else:
-                weights.append(create_random_matrix((layers[i], input), [0, np.sqrt(2/layers[i])]))
+                weights.append(create_random_matrix((layers[i], input), [0, np.sqrt(2/input)]))
         else:
             if w_range:
                 weights.append(create_random_matrix((layers[i], layers[i-1]), w_range))
             else:
-                weights.append(create_random_matrix((layers[i], layers[i - 1]), [0, np.sqrt(2/layers[i])]))
+                weights.append(create_random_matrix((layers[i], layers[i - 1]), [0, np.sqrt(2/input)]))
     if w_range:
        weights.append(create_random_matrix((output, layers[-1]), w_range))
     else:
-        weights.append(create_random_matrix((output, layers[-1]), [0, np.sqrt(2/output)]))
+            weights.append(create_random_matrix((output, layers[-1]), [0, np.sqrt(2/input)]))
     if not bias:
         bias_list = []
     nodes = [np.zeros(input)]
@@ -137,7 +144,7 @@ def softmax_gradient(s):
     return np.diagflat(s) - np.dot(s, s.T)
 
 def ReLU_gradient(x):
-    return np.where(x > 0, 1, 0)
+    return np.where(x > 0, 1,   LEAK)
 
 def SGD(somethings_gradient, lr):
     """
@@ -167,10 +174,28 @@ def backpropagation_and_optimization(weights, bias, nodes, activated_nodes,  act
     for i in reversed(range(1, len(weights) + 1)):
         current_layer_error_term = np.dot(weights[i - 1].T, current_layer_error_term) * ReLU_gradient(nodes[i - 1])
         b_grad = np.sum(current_layer_error_term)
+        b_grad = clip_gradient(b_grad)
         w_grad = np.dot(activated_nodes[i - 1], current_layer_error_term)
+        w_grad = clip_gradient(w_grad)
 
         # Optimization
         bias[i - 1] += SGD(b_grad, learning_rate)
         weights[i - 1] += SGD(w_grad, learning_rate)
 
     return weights, bias
+
+
+def clip_gradient(gradients):
+    """
+    Clips the gradients by the L2 norm.
+    :param gradients: numpy array, the gradients to be clipped
+    :return: numpy array, the clipped gradients
+    """
+    # Compute L2 norm of the gradients
+    grad_norm = np.linalg.norm(gradients)
+
+    # If the gradient norm exceeds the threshold, scale the gradients
+    if grad_norm > CLIP:
+        gradients = gradients * (CLIP / grad_norm)
+
+    return gradients

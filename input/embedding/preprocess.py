@@ -1,7 +1,7 @@
 """
 
 Script name: "input/embedding/preprocess.py"\n
-Goal of the script: Contains functions used to preprocess a split corpus of words.\n
+Goal of the script: Contains functions used to preprocess a single word.\n
 Part of project: "Efroakh"\n
 Description of project: A video game that programs itself.\n
 Ways to contact me if something went wrong in the code: itay.rimmler@gmail.com\n

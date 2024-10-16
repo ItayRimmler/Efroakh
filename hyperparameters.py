@@ -1,6 +1,7 @@
 HIDDEN_LAYER_SIZES = [64, 128, 64]
-EPOCHS = 100
+EPOCHS = 1000
 LR = 0.01
-SAMPLE_SIZE = 1000
-import random
-BEGINNING = random.randint(0,10000 - SAMPLE_SIZE)
+CLIP = 1.5
+LEAK = 0.5
+TRAIN = lambda s: int(0.8 * s)
+TEST = lambda s: int(0.2 * s)

@@ -19,6 +19,7 @@ import input.embedding.preprocess as pp
 def embed(corpus, labels, label_to_index):
     """
     The whole embedding process\n
+    Some work here is credited to ChatGPT.\n
     :param corpus: a bunch of strings, sentences or words that we want to analyse. NOTE: Can currently only be an iterable
     :return: The dataset, embedded
     """

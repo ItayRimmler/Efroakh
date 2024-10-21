@@ -12,22 +12,37 @@ Deez: Nuts\n
 
 
 # Import functions
-import input.embedding.index as index
+import input.embedding.sentence_embedding as se
 import input.embedding.preprocess as pp
 
 
-def embed(corpus):
+def embed(corpus, labels, label_to_index):
     """
     The whole embedding process\n
+    Some work here is credited to ChatGPT.\n
     :param corpus: a bunch of strings, sentences or words that we want to analyse. NOTE: Can currently only be an iterable
     :return: The dataset, embedded
     """
-    dataset = index.tokenize(corpus)
-    dataset = pp.lowercase(dataset)
-    dataset = pp.rid_of_i_we(dataset)
-    dataset = pp.rid_of_punctuation(dataset)
-    dataset = pp.rid_of_ing(dataset)
-    dataset = pp.rid_of_preposition(dataset)
-    vocabulary = index.map(dataset)
-    dataset = index.index(dataset, vocabulary)
-    return dataset, len(vocabulary), vocabulary
+
+    dataset = []
+
+    # Preprocess
+    for string in corpus:
+        p_string = ' '.join(pp.lowercase(word) for word in string.split())
+        p_string = ' '.join(pp.rid_of_i_we(word) for word in p_string.split())
+        p_string = ' '.join(pp.rid_of_punctuation(word) for word in p_string.split())
+        p_string = ' '.join(pp.rid_of_ing(word) for word in p_string.split())
+        p_string = ' '.join(pp.rid_of_preposition(word) for word in p_string.split())
+        dataset.append(p_string)
+
+    # Load the model
+    tokenizer, model = se.load_model()
+
+    # Create embeddings for sentences
+    embeddings = se.create_embeddings(dataset, tokenizer, model)
+
+    # Prepare the result matrix
+    embedding_dim = embeddings.shape[1]
+    result_matrix, label_matrix = se.prepare_result_matrix(dataset, labels, embedding_dim, embeddings, len(label_to_index), label_to_index)
+
+    return result_matrix, label_matrix

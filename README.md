@@ -3,6 +3,8 @@
 
 **Efroakh** is a self-programming video game, utilizing neural networks to adapt its gameplay based on player input prompt.
 
+Currently developing v.2. Efroakh v.1 is the program in its first 12 commits.
+
 ## Features
 
 - Neural network-driven gameplay adaptation

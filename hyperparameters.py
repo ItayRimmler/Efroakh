@@ -1,7 +1,9 @@
-HIDDEN_LAYER_SIZES = [64, 128, 64]
+HIDDEN_LAYER_SIZE = 128
+HIDDEN_LAYER_AMOUNT = 4
+CLASSES = 4
 EPOCHS = 1000
-LR = 0.01
-CLIP = 1.5
-LEAK = 0.5
-TRAIN = lambda s: int(0.8 * s)
-TEST = lambda s: int(0.2 * s)
+LR = 0.001
+TRAIN = lambda s: int(0.9 * s)
+TEST = lambda s: int(0.1 * s)
+SUBSET_SIZE = 10000
+DATASET_SIZE = 100000

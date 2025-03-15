@@ -9,17 +9,18 @@ Uploaded to GitHub in the link: https://github.com/ItayRimmler?tab=repositories\
 Deez: Nuts\n
 
 """
-
+from sipbuild.generator.parser.annotations import string
 
 # Import functions
 import input.embedding.sentence_embedding as se
 import input.embedding.preprocess as pp
 
 
-def embed(corpus, labels, label_to_index):
+def embed(corpus, labels):
     """
     The whole embedding process\n
     Some work here is credited to ChatGPT.\n
+    NOTE: Label embedding is done inside "se.prepare_result_matrix" function
     :param corpus: a bunch of strings, sentences or words that we want to analyse. NOTE: Can currently only be an iterable
     :return: The dataset, embedded
     """
@@ -28,11 +29,11 @@ def embed(corpus, labels, label_to_index):
 
     # Preprocess
     for string in corpus:
-        p_string = ' '.join(pp.lowercase(word) for word in string.split())
-        p_string = ' '.join(pp.rid_of_i_we(word) for word in p_string.split())
-        p_string = ' '.join(pp.rid_of_punctuation(word) for word in p_string.split())
-        p_string = ' '.join(pp.rid_of_ing(word) for word in p_string.split())
-        p_string = ' '.join(pp.rid_of_preposition(word) for word in p_string.split())
+        p_string = string.lower()
+        p_string = pp.rid_of_punctuation(p_string)
+        p_string = pp.rid_of_i_we(p_string)
+        p_string = pp.rid_of_ing(p_string)
+        p_string = pp.rid_of_preposition(p_string)
         dataset.append(p_string)
 
     # Load the model
@@ -43,6 +44,5 @@ def embed(corpus, labels, label_to_index):
 
     # Prepare the result matrix
     embedding_dim = embeddings.shape[1]
-    result_matrix, label_matrix = se.prepare_result_matrix(dataset, labels, embedding_dim, embeddings, len(label_to_index), label_to_index)
-
-    return result_matrix, label_matrix
+    result_matrix, label_array = se.prepare_result_matrix(dataset, labels, embedding_dim, embeddings)
+    return result_matrix, label_array

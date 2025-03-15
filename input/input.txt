@@ -1,3 +1,0 @@
-A short description of the "Input" directory:
-
-Basically we're preparing the input with the CBOW technique. We take from 'assets' a dataset in .txt format (currently only .txt) and we convert it into an input and output vectors

@@ -1,20 +1,13 @@
 """
 
 Script name: "./input/embedding/sentence_embedding"\n
-Goal of the script: Contains functions for sentence embeddings.\n
+Goal of the script: Contains functions for sentence embeddings. NOTE: You could argue that it's redundant to have this script and the embed.py script, considering we only embed sentences... But if we were to embed more things it would've been more necessary.\n
 Part of project: "Efroakh"\n
 Description of project: A video game that programs itself.\n
 Ways to contact me if something went wrong in the code: itay.rimmler@gmail.com\n
 Uploaded to GitHub in the link: https://github.com/ItayRimmler?tab=repositories\n
 Deez: Nuts\n
 
-
-This script has a special description:\n
-So I embedded and labeled incorrectly in the beginning.\n
-Then I got the help of ChatGPT to apply sentence embedding.\n
-But I had already a format of work (for example, the NN expected a np matrix).\n
-So I adapted prompts to ChatGPT so I'll get code that fits to my formats.\n
-That's why you see a lot of functions that their necessity might seem questionable at first.\n
 """
 
 
@@ -65,12 +58,13 @@ def create_embeddings(sentences, tokenizer, model):
     """
     embeddings = []
     for sentence in sentences:
+        print(f"Embedding: {sentence}")
         embedding = encode_sentence(sentence, tokenizer, model)
         embeddings.append(embedding)
     return np.vstack(embeddings)  # Shape: (num_sentences, 768)
 
 
-def prepare_result_matrix(sentences, labels, embedding_dim, embeddings, num_classes, label_to_index):
+def prepare_result_matrix(sentences, labels, embedding_dim, embeddings):
     """
     Prepare the result matrix combining sentence embeddings and labels.\n
     Credit to ChatGPT.\n
@@ -81,35 +75,14 @@ def prepare_result_matrix(sentences, labels, embedding_dim, embeddings, num_clas
         embedding_dim (int): Dimension of the sentence embeddings.
 
     Returns:
-        np.ndarray: Resulting matrix of shape (num_sentences, 2, embedding_dim).
+        Resulting matrices of shape (num_sentences, embedding_dim) and (num_sentences, num_classes), containing the sentences in their embedded version and the labels in an embedded version.
     """
     num_sentences = len(sentences)
-    result_matrix = np.zeros((num_sentences, 1, embedding_dim))
-    labels_matrix = np.zeros((num_sentences, 1, num_classes))
+    result_matrix = np.zeros((num_sentences, embedding_dim))
+    labels_array = np.zeros(num_sentences)
     for k in range(num_sentences):
-        result_matrix[k, 0, :] = embeddings[k]  # Sentence embedding
-        # Store the label as a one-hot encoded vector (assuming a small number of classes)
+        result_matrix[k, :] = embeddings[k]  # Sentence embedding
         if not labels is None:
-            labels_matrix[k, 0, :] = one_hot_encode(labels[k],
-                                                num_classes, label_to_index)  # Replace with your function for one-hot encoding
+            labels_array[k] = 0 + 1 * int(labels[k] == 'down') + 2 * int(labels[k] == 'right') + 3 * int(labels[k] == 'left') # LABEL EMBEDDING IS DONE HERE!!
 
-    return result_matrix, labels_matrix
-
-
-def one_hot_encode(label, num_classes, label_to_index):
-    """
-    Credit to ChatGPT.\n
-    One-hot encode a label into a vector.
-
-    Parameters:
-        label (str): The label to encode.
-        num_classes (int): The number of classes.
-
-    Returns:
-        np.ndarray: One-hot encoded vector.
-    """
-    # Create a zero array for the one-hot vector
-    one_hot = np.zeros(num_classes)
-    index = label_to_index[label]  # Map your label to an index
-    one_hot[index] = 1
-    return one_hot
+    return result_matrix, labels_array

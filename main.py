@@ -10,52 +10,86 @@ Deez: Nuts\n
 
 """
 
-
+# Imports
 import nn
 from hyperparameters import *
-from input.created_datasets.direction_embeddings import load_directions
+from input.created_datasets.direction_embeddings import load_directions, create_directions
+import torch
 from input.embedding.embed import embed
 import numpy as np
 
-dataset, labels, vocabulary = load_directions()
+# Loading the data
+# create_directions() # UNCOMMENT IF "directions_dataset_labels.npz" doesn't exist!
+dataset, labels = load_directions()
 test = dataset[-TEST(dataset.shape[0]):]
 dataset = dataset[:TRAIN(dataset.shape[0])]
 test_labels = labels[-TEST(labels.shape[0]):]
 labels = labels[:TRAIN(labels.shape[0])]
+
+# Defining sizes
 input_layer_size = dataset.shape[-1]
-output_layer_size = len(vocabulary)
-hidden_layer_sizes = HIDDEN_LAYER_SIZES
-a_nodes, weights, bias = nn.create_NN(input_layer_size, hidden_layer_sizes, output_layer_size)
+output_layer_size = CLASSES
+hidden_layer_size = HIDDEN_LAYER_SIZE
+number_of_hidden_layers = HIDDEN_LAYER_AMOUNT
+
+# Converting data to pytorch.tensor
+test = torch.from_numpy(test).type(torch.float32)
+dataset = torch.from_numpy(dataset).type(torch.float32)
+test_labels = torch.from_numpy(test_labels).long()
+labels = torch.from_numpy(labels).long()
+
+# Loading model
+model = nn.RNN_Model(input_layer_size, output_layer_size, hidden_layer_size, number_of_hidden_layers)
+criterion = torch.nn.CrossEntropyLoss()
+optimizer = torch.optim.Adam(model.parameters(), lr=LR, weight_decay=1e-5)
 
 # Training
-for j in range(EPOCHS):
-    for i in range(dataset.shape[0]):
-        a_nodes, z_nodes = nn.feedforward(a_nodes, weights, bias, dataset[i, 0, :]/np.max(dataset[i, 0, :]))
-        weights, bias = nn.backpropagation_and_optimization(weights, bias, z_nodes, a_nodes, labels[i, 0, :], LR)
-    loss = nn.cross_entropy_loss(a_nodes[-1], labels[labels.shape[0]-1,0,:])
-    print(f"Training. Current epoch: {j + 1}/{EPOCHS}. Current loss: {loss}")
+model.train()
 
-correct_predictions_amount = 0
-total_loss = 0
+for j in range(EPOCHS):
+    indices = torch.randperm(dataset.size()[0])[:SUBSET_SIZE]
+    outputs = model(dataset[indices, :])
+    loss = criterion(outputs, labels[indices])
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    print(f'Epoch [{j + 1}/{EPOCHS}], Loss: {loss.item():.4f}')
 
 # Testing
-for i in range(test.shape[0]):
-    nodes, _ = nn.feedforward(a_nodes, weights, bias, test[i, 0, :]/np.max(test[i, 0, :]))
-    total_loss += nn.cross_entropy_loss(nodes[-1], test_labels[test_labels.shape[0]-1,0,:])
-    if np.argmax(nodes[-1]) == np.argmax(test_labels[i, 0, :]):
-        correct_predictions_amount += 1
+model.eval()
 
+# Initializing variables
+correct_predictions_amount = 0
+total_samples = test_labels.size()[0]
 
-accuracy = correct_predictions_amount/test.shape[0]
-average_loss = total_loss/test.shape[0]
+with torch.no_grad():
+    predicted = model(test)
+    for i in range(total_samples):
+        correct_predictions_amount += int(torch.argmax(predicted, dim=1).squeeze(0)[i].item() == test_labels[i].item())
 
-print(f"Acc: {accuracy}")
-print(f"Avg Loss: {average_loss}")
+# Printing accuracy
+accuracy = correct_predictions_amount/total_samples
+print(f'Accuracy: {accuracy * 100:.2f}%')
 
-# Testing with a new input
-prompt = [input()]
-new_prompt, _ = embed(prompt, None, vocabulary)
-final_nodes, _ = nn.feedforward(a_nodes, weights, bias, new_prompt[0, 0, :]/np.max(new_prompt[0, 0, :]))
-final_output = final_nodes[-1]
-predicted_class = np.argmax(final_output)
-print(list(vocabulary.keys())[list(vocabulary.values()).index(predicted_class)]) # Prints the most significant word
+# Testing with new inputs:
+while True:
+    prompt = input()
+    if prompt == 'exit':
+        break
+    new_prompt, _ = embed([prompt], None)
+    new_prompt = torch.from_numpy(new_prompt).type(torch.float32)
+
+    # Inserting it into the model
+    with torch.no_grad():
+        final_output = torch.nn.functional.softmax(model(new_prompt), dim=-1)
+        predicted_class = torch.argmax(final_output, dim=-1)
+    if predicted_class == 0:
+        print("up", prompt)
+    elif predicted_class == 1:
+        print("down", prompt)
+    elif predicted_class == 2:
+        print("right", prompt)
+    elif predicted_class == 3:
+        print("left", prompt)
+    else:
+        print("none", prompt)

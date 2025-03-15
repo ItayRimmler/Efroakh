@@ -18,16 +18,15 @@ import numpy as np
 def create_directions():
     """
     Creates dataset and labels (without dividing into train and test) for training of the NN to detect directions.\n
-    1) Loads the dataset and labels from the right directory.\n
-    2) Embeds with a pre-made vocabulary each sentence.\n
+    1) Loads the dataset and labels from the right directory (main.py should be in the root).\n
+    2) Embeds each sentence. Embeds the labels, in this case, in a very simple manner, inside the "prepare_result_matrix" function inside the "embed" function.\n
     3) Saves a .npz file that can be loaded with numpy.\n
     NOTE: Works with Bert, usually takes like 5 minutes to run. Still, you want to run this only once.
     """
-    corpus = txt_reader.read_prompts_from_file("../../assets/prompt_dataset.txt")
-    labels = txt_reader.read_prompts_from_file("../../assets/prompt_labels.txt")
-    vocabulary = {"up":0, "down":1 ,"right":2, "left":3}
-    dataset, labels = embed.embed(corpus, labels, vocabulary)
-    np.savez('directions_dataset_labels.npz', dataset=dataset, labels=labels)
+    corpus = txt_reader.read_prompts_from_file("assets/prompts.txt")
+    labels = txt_reader.read_prompts_from_file("assets/labels.txt")
+    dataset, labels = embed.embed(corpus, labels)
+    np.savez('input/created_datasets/directions_dataset_labels.npz', dataset=dataset, labels=labels)
 
 def load_directions():
     """
@@ -36,5 +35,4 @@ def load_directions():
     data = np.load('./input/created_datasets/directions_dataset_labels.npz')
     dataset = data['dataset']
     labels = data['labels']
-    vocabulary = {"up":0, "down":1 ,"right":2, "left":3}
-    return dataset, labels, vocabulary
+    return dataset, labels
